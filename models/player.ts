@@ -10,8 +10,6 @@ export function player_model(uniform_data: any, settings: SettingsType): THREE.G
 
     // const BoxMaterial = new THREE.MeshStandardMaterial({color: 0xfcba03, wireframe: true});
     
-    console.log(uniform_data);
-    
     const BoxMaterial = new THREE.ShaderMaterial({
         wireframe: false,
         uniforms: uniform_data,
@@ -136,11 +134,11 @@ export function player_model(uniform_data: any, settings: SettingsType): THREE.G
                 // varying
                 pos = position;
 
-                float AMP = 0.75;
+                float AMP = 0.2;
                 float FREQ = 0.43;
                 float INV_SPEED = 60.0;
 
-                float noise = AMP * (radius - 3.0) + cnoise(FREQ * position + time / INV_SPEED);
+                float noise = (AMP + (radius - 3.0)) + cnoise(FREQ * position + time / INV_SPEED);
                 vec3 newPosition = position + normal * noise;
 
                 vec4 result;

@@ -5,7 +5,7 @@ import GameScreen from "./GameScreen";
 import GameWorld from "./GameWorld";
 import Pos2D from "./Pos2D";
 
-import dot from "../assets/smokeparticle.png"
+import dot from "../assets/square.png"
 
 export default class Player extends GameObject{
     light: THREE.PointLight
@@ -15,15 +15,14 @@ export default class Player extends GameObject{
 
     shaders_data: any
 
-    constructor(shaders_data: any){
-        super(new Pos2D(0, 0), null, shaders_data, new THREE.Vector3(1, 1, 1));
+    constructor(){
+        super(new Pos2D(0, 0), null, new THREE.Vector3(1, 1, 1));
 
         this.settings = {
             radius: 3,
             targetRadius: 3
         };
 
-        this.shaders_data = shaders_data;
         this.updateShadersData();
         this.model = player_model(this.shaders_data, this.settings);
 
@@ -46,25 +45,33 @@ export default class Player extends GameObject{
         this.loadParticles(screen, dot);
     }
 
-    update(_screen: GameScreen, world: GameWorld){
+    update(screen: GameScreen, world: GameWorld){
         this.model.position.set(this.pos.x + world.camera.pos.x, this.Z, this.pos.y + world.camera.pos.y);
         this.light.position.set(this.pos.x + world.camera.pos.x, this.LIGHT_Z, this.pos.y + world.camera.pos.y);
 
         world.objects.forEach(object => {
             if(world.distance(this.real_pos(world), object.pos) < this.settings.radius)
-                this.eat(object, world);
+                this.eat(screen, object, world);
         });
         
         if(this.settings.radius < this.settings.targetRadius)
             this.settings.radius += 0.01;
 
         this.updateShadersData();
+
+        $("#score").html("Score: " + Math.floor(this.settings.targetRadius*10 - 30));
     }
 
-    eat(object: GameObject, world: GameWorld){
-        this.settings.targetRadius += object.scale.x;
-        
-        this.emitParticles(0.05, this.model.position);
+    eat(screen: GameScreen, object: GameObject, world: GameWorld){
+        const BONUS = object.scale.x * 2 / this.settings.targetRadius;
+
+        this.settings.targetRadius += BONUS;
+
+        const POS = object.model.position;
+        POS.y += 150;
+        this.emitParticles(0.05, POS);
+
+        screen.config.TARGET_CAMERA_WIDTH += BONUS * 10;
 
         object.remove(world);
     }

@@ -87,19 +87,24 @@ export default class Input{
     }
 
     static update(player: Player, camera: Camera, screen: GameScreen){
-        if(Input.keys[87]){ // W
-            camera.pos.y -= camera.speed;
-        }
-        if(Input.keys[83]){ // S
-            camera.pos.y += camera.speed;
-        }
-        if(Input.keys[65]){ // A
-            camera.pos.x -= camera.speed;
-        }
-        if(Input.keys[68]){ // D
-            camera.pos.x += camera.speed;
-        }
+        const USE_KEYBOARD = false;
 
-        //Input.followMouse(player, camera);
+        if(USE_KEYBOARD){
+            if(Input.keys[87]){ // W
+                camera.pos.y -= camera.speed;
+            }
+            if(Input.keys[83]){ // S
+                camera.pos.y += camera.speed;
+            }
+            if(Input.keys[65]){ // A
+                camera.pos.x -= camera.speed;
+            }
+            if(Input.keys[68]){ // D
+                camera.pos.x += camera.speed;
+            }
+        }
+        else{
+            Input.followMouse(player, camera);
+        }
     }
 }

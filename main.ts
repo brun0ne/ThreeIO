@@ -11,10 +11,6 @@ $(document).ready(function(){
     // setup
     screen.load();
 
-    window.onresize = function(){
-        // screen.resize(window.innerWidth, window.innerHeight);
-    }
-
     Assets.preLoad();
     world.load(screen);
 

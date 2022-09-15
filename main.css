@@ -1,3 +1,14 @@
 .absolute{
     position: absolute;
 }
+
+#score{
+    top: 0.5%;
+    right: 0.5%;
+
+    font-family: Consolas, Consolas;
+    color: white;
+    text-shadow: 2px;
+
+    font-size: 2.0vh;
+}

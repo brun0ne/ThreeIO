@@ -18,18 +18,29 @@ export default class GameObject extends ParticleObject{
 
     emitter: any
 
-    constructor(pos: Pos2D, model: Function | THREE.Group, shaders_data: any, scale: THREE.Vector3 = new THREE.Vector3(1, 1, 1)){
+    display: boolean
+
+    constructor(pos: Pos2D, model: Function | THREE.Group, scale: THREE.Vector3 = new THREE.Vector3(1, 1, 1)){
         super();
 
         this.pos = pos;
         this.scale = scale;
 
+        this.shaders_data = {
+            time: {
+                type: "f",
+                value: 0
+            },
+            display: {
+                type: "f",
+                value: 0
+            }
+        };
+
         if (typeof model === "function")
-            this.model = model(shaders_data);
+            this.model = model(this.shaders_data);
         else
             this.model = model;
-
-        this.shaders_data = shaders_data;
 
         this.ID = INC_ID;
         INC_ID += 1;
@@ -37,11 +48,27 @@ export default class GameObject extends ParticleObject{
 
     load(screen: GameScreen){
         screen.scene.add(this.model);
+
+        this.model.position.set(this.pos.x, 0, this.pos.y);
+        this.model.scale.set(this.scale.x, this.scale.y, this.scale.z);
     }
 
-    update(_screen: GameScreen, _world: GameWorld){
-        this.model.position.set(this.pos.x, 0, this.pos.y);
-        this.model.scale.set(this.scale.x, this.scale.y, this.scale.z)
+    update(screen: GameScreen, world: GameWorld){
+        this.shaders_data["display"] = {
+            type: "f",
+            value: world.distance(this.pos, world.player.real_pos(world)) < screen.config.CAMERA_WIDTH / 1.5
+        };
+
+        if(this.shaders_data.display.value && this.model.parent == null)
+            screen.scene.add(this.model);
+        
+        if(!this.shaders_data.display.value && this.model.parent != null)
+            this.model.removeFromParent();
+
+        if(this.shaders_data.display.value){
+            this.model.position.set(this.pos.x, 0, this.pos.y);
+            this.model.scale.set(this.scale.x, this.scale.y, this.scale.z);
+        }
 
         this.custom_update();
     }

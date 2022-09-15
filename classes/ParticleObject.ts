@@ -10,7 +10,7 @@ import {
     Scale,
     Span,
     SphereZone,
-    ease,
+    ease
   } from 'three-nebula';
 
 import * as THREE from "three"
@@ -26,15 +26,15 @@ export default class ParticleObject{
             const createSprite = () => {
                 var material = new THREE.SpriteMaterial({
                     map: texture,
-                    color: 0xff0000,
-                    blending: THREE.AdditiveBlending,
-                    fog: true,
+                    color: 0xffffff,
+                    blending: THREE.NormalBlending,
+                    fog: false,
                 });
                 return new THREE.Sprite(material);
             };
     
             this.emitter
-                .setRate(new Rate(new Span(3, 6), new Span(0, 0.002)))
+                .setRate(new Rate(new Span(5, 8), new Span(0, 0.002)))
                 .addInitializers([
                     new Body(createSprite()),
                     new Mass(1),
@@ -42,9 +42,9 @@ export default class ParticleObject{
                     new Position(new SphereZone(0.5))
                 ])
                 .addBehaviours([
-                    new RandomDrift(10, 0, 10, 0),
-                    new Scale(new Span(1, 2), 0),
-                    new Color('#FF0026', ['#ffff00', '#ffff11'], Infinity, ease.easeOutSine),
+                    new RandomDrift(5, 0, 5, 0),
+                    new Scale(new Span(0.2, 0.4), 0),
+                    new Color('#ff0000', '#ff0000', Infinity, ease.easeOutSine),
                 ])
                 
             screen.nebula.addEmitter(this.emitter);

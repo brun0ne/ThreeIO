@@ -10,14 +10,19 @@ import { FilmPass } from '../node_modules/three/examples/jsm/postprocessing/Film
 import { ShaderPass } from '../node_modules/three/examples/jsm/postprocessing/ShaderPass.js';
 import { FXAAShader } from '../node_modules/three/examples/jsm/shaders/FXAAShader.js';
 
-import ParticleSystem, { GPURenderer } from 'three-nebula';
+import ParticleSystem, { GPURenderer, SpriteRenderer } from 'three-nebula';
+import AmbienceParticles from "./AmbienceParticles"
+
+import ambience_particle from "../assets/smokeparticle.png"
 
 type ConfigType = {
     shadows: boolean
-    CAMERA_Y: number,
-    CAMERA_WIDTH: number,
-    GROUND_LEVEL: number,
+    CAMERA_Y: number
+    TARGET_CAMERA_WIDTH: number
+    CAMERA_WIDTH: number
+    GROUND_LEVEL: number
     BLOOM_STRENGH: number
+    WORLD_SIZE: number
 }
 
 export default class GameScreen{
@@ -33,6 +38,7 @@ export default class GameScreen{
     player_scene: THREE.Scene
 
     nebula: ParticleSystem
+    GPU_nebula: ParticleSystem
 
     constructor(){
         this.scene = new THREE.Scene();
@@ -41,10 +47,14 @@ export default class GameScreen{
         this.config = {
             shadows: true,
             CAMERA_Y: 200,
-            CAMERA_WIDTH: 960 / 8, // scale,
+            CAMERA_WIDTH: 0,
+            TARGET_CAMERA_WIDTH: 960 / 8, // scale
             GROUND_LEVEL: 0,
-            BLOOM_STRENGH: 0.2
+            BLOOM_STRENGH: 0.2,
+            WORLD_SIZE: 1000
         };
+
+        this.config.CAMERA_WIDTH = this.config.TARGET_CAMERA_WIDTH;
     }
 
     load(){
@@ -65,14 +75,11 @@ export default class GameScreen{
         this.camera.rotation.set(-Math.PI/2, 0, 0);
 
         function onWindowResize(){
-            console.log(this.composer.passes);
-            
             this.composer.passes[3].uniforms['resolution'].value.x = 1 / (window.innerWidth * window.devicePixelRatio);
             this.composer.passes[3].uniforms['resolution'].value.y = 1 / (window.innerHeight * window.devicePixelRatio);
 
             this.renderer.setSize(window.innerWidth, window.innerHeight);
             this.composer.setSize(window.innerWidth, window.innerHeight);
-            console.log(this.composer)
 
             this.set_camera();
         }
@@ -143,12 +150,10 @@ export default class GameScreen{
         const effectFilm = new FilmPass(0, 0, 0, false);
         effectFilm.renderToScreen = true;
         this.composer.addPass(effectFilm);
-
-        //this.particleSystem.addRenderer(new GPURenderer(this.scene, THREE));
     }
 
     setup_plane(){
-        const planeGeometry = new THREE.PlaneGeometry(1000, 1000);
+        const planeGeometry = new THREE.PlaneGeometry(this.config.WORLD_SIZE, this.config.WORLD_SIZE);
         const planeMaterial = new THREE.MeshStandardMaterial({
             color: 0x005291
         });
@@ -162,9 +167,19 @@ export default class GameScreen{
     }
 
     setup_particles(){
+        // Sprites Nebula
         const nebula = new ParticleSystem();
-        const nebulaRenderer = new GPURenderer(this.scene, THREE);
+        const nebulaRenderer = new SpriteRenderer(this.scene, THREE);
         this.nebula = nebula.addRenderer(nebulaRenderer);
+
+        // GPU Nebula
+        const GPU_nebula = new ParticleSystem();
+        const GPU_nebulaRenderer = new GPURenderer(this.scene, THREE);
+        this.GPU_nebula = GPU_nebula.addRenderer(GPU_nebulaRenderer);
+
+        // ambience
+        const ambience = new AmbienceParticles();
+        ambience.addAmbience(this, ambience_particle);
     }
 
     get w(){
@@ -177,9 +192,16 @@ export default class GameScreen{
 
     update(){
         this.composer.render();
-        this.nebula.update();
 
-        this.stats.update();  
+        this.nebula.update();
+        this.GPU_nebula.update();
+
+        this.stats.update();
+
+        if(this.config.CAMERA_WIDTH < this.config.TARGET_CAMERA_WIDTH){
+            this.config.CAMERA_WIDTH += 0.01;
+            this.set_camera();
+        }
 
         window.requestAnimationFrame(this.update.bind(this));
     }
