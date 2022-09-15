@@ -44,7 +44,7 @@ export default class ParticleObject{
                 .addBehaviours([
                     new RandomDrift(5, 0, 5, 0),
                     new Scale(new Span(0.2, 0.4), 0),
-                    new Color('#ff0000', '#ff0000', Infinity, ease.easeOutSine),
+                    new Color('#ff0000', '#ffff00', Infinity, ease.easeOutSine),
                 ])
                 
             screen.nebula.addEmitter(this.emitter);

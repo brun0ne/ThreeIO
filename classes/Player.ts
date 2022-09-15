@@ -5,7 +5,7 @@ import GameScreen from "./GameScreen";
 import GameWorld from "./GameWorld";
 import Pos2D from "./Pos2D";
 
-import dot from "../assets/square.png"
+import dot from "../assets/white.png"
 
 export default class Player extends GameObject{
     light: THREE.PointLight
