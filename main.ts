@@ -9,20 +9,30 @@ const world = new GameWorld();
 
 $(document).ready(function(){
     // setup
-    screen.load();
-
     Assets.preLoad();
-    world.load(screen);
-
     Input.addListeners();
+
+    let LOADED = false;
 
     // start main loop
     const FPS = 60;
     
     setInterval(function(){
-        world.update(screen);
-        Input.update(world.player, world.camera, screen);
-    }, 1000/FPS);
+        if(!LOADED && Assets.TO_LOAD == Assets.loaded()){
+            LOADED = true;
 
-    screen.update();
+            screen.load();
+            world.load(screen);
+
+            // start drawing loop
+            setTimeout(function(){
+                $("#loading").remove();
+                screen.update();
+            }, 200);
+        }
+        if(LOADED){
+            world.update(screen);
+            Input.update(world.player, world.camera, screen);
+        }
+    }, 1000/FPS);
 });

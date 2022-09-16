@@ -106,5 +106,14 @@ export default class Input{
         else{
             Input.followMouse(player, camera);
         }
+
+        if(Input.mouse.left && player.settings.targetRadius > 1){
+            screen.config.TARGET_BLOOM_STRENGH = 0.4;
+            player.SPEED_UP = true;
+        }
+        else{
+            screen.config.TARGET_BLOOM_STRENGH = 0.2;
+            player.SPEED_UP = false;
+        }
     }
 }

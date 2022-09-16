@@ -11,7 +11,7 @@ export default class GameObject extends ParticleObject{
     pos: Pos2D
     scale: THREE.Vector3
 
-    model: THREE.Group
+    model: THREE.Group | null
     shaders_data: any // data to be passed into shaders
 
     ID: number
@@ -19,8 +19,9 @@ export default class GameObject extends ParticleObject{
     emitter: any
 
     display: boolean
+    eatCooldown: number
 
-    constructor(pos: Pos2D, model: Function | THREE.Group, scale: THREE.Vector3 = new THREE.Vector3(1, 1, 1)){
+    constructor(pos: Pos2D, model: Function | THREE.Group, scale: THREE.Vector3 = new THREE.Vector3(1, 1, 1), eatCooldown: number = 0){
         super();
 
         this.pos = pos;
@@ -41,16 +42,20 @@ export default class GameObject extends ParticleObject{
             this.model = model(this.shaders_data);
         else
             this.model = model;
+        
+        this.eatCooldown = eatCooldown;
 
         this.ID = INC_ID;
         INC_ID += 1;
     }
 
     load(screen: GameScreen){
-        screen.scene.add(this.model);
+        if(this.model != null){
+            screen.scene.add(this.model);
 
-        this.model.position.set(this.pos.x, 0, this.pos.y);
-        this.model.scale.set(this.scale.x, this.scale.y, this.scale.z);
+            this.model.position.set(this.pos.x, 0, this.pos.y);
+            this.model.scale.set(this.scale.x, this.scale.y, this.scale.z);
+        }
     }
 
     update(screen: GameScreen, world: GameWorld){
@@ -59,27 +64,37 @@ export default class GameObject extends ParticleObject{
             value: world.distance(this.pos, world.player.real_pos(world)) < screen.config.CAMERA_WIDTH / 1.5
         };
 
-        if(this.shaders_data.display.value && this.model.parent == null)
-            screen.scene.add(this.model);
-        
-        if(!this.shaders_data.display.value && this.model.parent != null)
-            this.model.removeFromParent();
+        if(this.model != null){
+            if(this.shaders_data.display.value && this.model.parent == null)
+                screen.scene.add(this.model);
+            
+            if(!this.shaders_data.display.value && this.model.parent != null)
+                this.model.removeFromParent();
+        }
 
-        if(this.shaders_data.display.value){
+        if(this.shaders_data.display.value && this.model != null){
             this.model.position.set(this.pos.x, 0, this.pos.y);
             this.model.scale.set(this.scale.x, this.scale.y, this.scale.z);
         }
 
-        this.custom_update();
+        if(this.eatCooldown > 0)
+            this.eatCooldown -= 1;
+
+        this.custom_update(screen, world);
     }
 
-    custom_update(){}
+    custom_update(_screen: GameScreen, _world: GameWorld){}
     
-    remove(world: GameWorld){
+    remove(_screen: GameScreen, world: GameWorld){
         const same_ID = (object: GameObject) => object.ID === this.ID;
         const index = world.objects.findIndex(same_ID);
 
-        this.model.removeFromParent();
+        if(this.model != null)
+            this.model.removeFromParent();
         world.objects.splice(index, 1);
+
+        this.custom_remove(_screen, world);
     }
+
+    custom_remove(_screen: GameScreen, _world: GameWorld){}
 }

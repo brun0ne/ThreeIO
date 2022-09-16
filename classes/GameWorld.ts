@@ -1,13 +1,15 @@
 import GameScreen from './GameScreen'
 import GameObject from './GameObject'
-import Pos2D from './Pos2D';
-import Camera from './Camera';
-import Player from './Player';
-import Input from './Input';
+import Pos2D from './Pos2D'
+import Camera from './Camera'
+import Player from './Player'
+import Input from './Input'
 
-import BoxObject from './BoxObject';
+import BoxObject from './BoxObject'
+import WanderingObject from './WanderingObject'
 
 import random from "../node_modules/random/dist/cjs/random"
+import randomWeightedChoice from "random-weighted-choice"
 
 export default class GameWorld{
     objects: GameObject[]
@@ -28,7 +30,7 @@ export default class GameWorld{
     }
 
     load(screen: GameScreen){
-        this.populate();
+        this.populate(screen);
 
         this.objects.forEach(object => {
             object.load(screen);
@@ -64,27 +66,50 @@ export default class GameWorld{
         this.time += 1;
     }
 
-    populate(){
-        // this.objects.push(new BoxObject(new Pos2D(10, 10)));
-        // this.objects.push(new BoxObject(new Pos2D(-10, -10)));
-        // this.objects.push(new BoxObject(new Pos2D(25, 15)));
-        // this.objects.push(new BoxObject(new Pos2D(20, -15)));
-        // this.objects.push(new BoxObject(new Pos2D(15, -30)));
+    populate(screen: GameScreen){
+        const WANDERING = 10;
+
+        for(let i = 0; i < WANDERING; i++){
+            const OBJ = new WanderingObject(new Pos2D(0, 0));
+            OBJ.randomizePos(screen, this);
+
+            this.addObject(OBJ, screen);
+        }
     }
 
     generate(screen: GameScreen){
         const OBJECTS = 1000;
 
         while(this.objects.length < OBJECTS){
-            const x = random.float(-screen.config.WORLD_SIZE/2, screen.config.WORLD_SIZE/2);
-            const y = random.float(-screen.config.WORLD_SIZE/2, screen.config.WORLD_SIZE/2);
+            const POS = screen.randomPosOnMap();
 
-            this.objects.push(new BoxObject(new Pos2D(x, y)));
-            this.objects.at(-1).load(screen);
+            const choice = randomWeightedChoice([
+                {
+                    id: "box",
+                    weight: 1
+                }
+            ]);
+
+            let OBJ: GameObject;
+
+            switch (choice){
+                case "box":
+                    OBJ = new BoxObject(POS);
+                    break;
+                default:
+                    alert("error");
+            }
+
+            this.addObject(OBJ, screen);
         }
     }
 
     distance(pos1: Pos2D, pos2: Pos2D): number{
         return Math.sqrt((pos1.x - pos2.x)**2 + (pos1.y - pos2.y)**2);
+    }
+
+    addObject(obj: GameObject, screen: GameScreen){
+        this.objects.push(obj);
+        this.objects.at(-1).load(screen);
     }
 }

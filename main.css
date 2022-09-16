@@ -1,3 +1,8 @@
+body{
+    background-color: black;
+    height: 100%;
+}
+
 .absolute{
     position: absolute;
 }
@@ -11,4 +16,21 @@
     text-shadow: 2px;
 
     font-size: 2.0vh;
+}
+
+#loading{
+    position: absolute;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    color: white;
+    width: 100%;
+    height: 100%;
+
+    font-family: Consolas, Consolas;
+    font-size: 2.5vh;
+
+    z-index: 99;
 }

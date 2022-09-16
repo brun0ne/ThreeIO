@@ -1,58 +1,35 @@
+import * as THREE from "three"
+
+import a_white from "../assets/white.png"
+import a_red from "../assets/red.png"
+import a_blue from "../assets/blue.png"
+import a_smoke from "../assets/smokeparticle.png"
+
 export default class Assets{
-    static images: HTMLCanvasElement[]
+    static images: {}
+    static TO_LOAD: number
 
-    static loadImage(src: string): (HTMLCanvasElement | HTMLImageElement){
-        const useCanvasCache = true;
-        let decodeCanvas: any;
-        let decodeCtx: CanvasRenderingContext2D;
-
-        if (useCanvasCache){
-            // creates a canvas to store the decoded image
-            decodeCanvas = document.createElement('canvas') as HTMLCanvasElement;
-            decodeCtx = decodeCanvas.getContext('2d') as CanvasRenderingContext2D;
-        }
-        let image = new Image();
-        
-        image.onload = function(){
-            // transfer the image to the canvas to keep the data unencoded in memory
-            if (useCanvasCache){
-                decodeCanvas.width = image.width;
-                decodeCanvas.height = image.height;
-                decodeCtx.drawImage(image, 0, 0);
-
-                console.log("loaded", decodeCanvas.width, decodeCanvas.height, src)
-            }
-        }
-        image.src = src;
-
-        // returns canvas or image
-        if (useCanvasCache){
-            return decodeCanvas;
-        }
-        else{
-            return image;
-        }
+    static load(name: string, imported_image: any){
+        new THREE.TextureLoader().load(imported_image, function(texture: THREE.Texture){
+            Assets.images[name] = texture;
+        });
     }
 
-    static getImage(path: string) {
-        path = "/assets/" + path;
-    
-        if (path == null)
-            return false;
-    
-        if (Assets.images[path] != null) {
-            return Assets.images[path];
-        } else {
-            Assets.images[path] = Assets.loadImage(path);
-    
-            return Assets.images[path];
-        }
+    static get(name: string){
+        return Assets.images[name];
     }
 
     static preLoad(){
-        Assets.images = [];
+        Assets.images = Array();
 
-        Assets.getImage("square.png");
-        Assets.getImage("player.png");
+        Assets.TO_LOAD = 4;
+        Assets.load("white", a_white);
+        Assets.load("red", a_red);
+        Assets.load("blue", a_blue);
+        Assets.load("smoke", a_smoke);
+    }
+
+    static loaded(){
+        return Object.keys(Assets.images).length;
     }
 }

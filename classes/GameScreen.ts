@@ -3,6 +3,9 @@ import * as THREE from "three"
 // DEV
 import Stats from '../node_modules/three/examples/jsm/libs/stats.module.js'
 
+import Pos2D from "./Pos2D"
+import Assets from "./Assets";
+
 import { EffectComposer } from '../node_modules/three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from '../node_modules/three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from '../node_modules/three/examples/jsm/postprocessing/UnrealBloomPass.js';
@@ -13,7 +16,7 @@ import { FXAAShader } from '../node_modules/three/examples/jsm/shaders/FXAAShade
 import ParticleSystem, { GPURenderer, SpriteRenderer } from 'three-nebula';
 import AmbienceParticles from "./AmbienceParticles"
 
-import ambience_particle from "../assets/smokeparticle.png"
+import random from "../node_modules/random/dist/cjs/random"
 
 type ConfigType = {
     shadows: boolean
@@ -22,6 +25,7 @@ type ConfigType = {
     CAMERA_WIDTH: number
     GROUND_LEVEL: number
     BLOOM_STRENGH: number
+    TARGET_BLOOM_STRENGH: number
     WORLD_SIZE: number
 }
 
@@ -50,11 +54,13 @@ export default class GameScreen{
             CAMERA_WIDTH: 0,
             TARGET_CAMERA_WIDTH: 960 / 8, // scale
             GROUND_LEVEL: 0,
-            BLOOM_STRENGH: 0.2,
+            BLOOM_STRENGH: 0,
+            TARGET_BLOOM_STRENGH: 0.2, // also controled by Inputs class
             WORLD_SIZE: 1000
         };
 
         this.config.CAMERA_WIDTH = this.config.TARGET_CAMERA_WIDTH;
+        this.config.BLOOM_STRENGH = this.config.TARGET_BLOOM_STRENGH;
     }
 
     load(){
@@ -179,7 +185,7 @@ export default class GameScreen{
 
         // ambience
         const ambience = new AmbienceParticles();
-        ambience.addAmbience(this, ambience_particle);
+        ambience.addAmbience(this, Assets.get("smoke"));
     }
 
     get w(){
@@ -198,11 +204,33 @@ export default class GameScreen{
 
         this.stats.update();
 
+        // config => target
         if(this.config.CAMERA_WIDTH < this.config.TARGET_CAMERA_WIDTH){
             this.config.CAMERA_WIDTH += 0.01;
             this.set_camera();
         }
 
+        this.config.BLOOM_STRENGH = this.interlace(this.config.BLOOM_STRENGH, this.config.TARGET_BLOOM_STRENGH);
+        this.composer.passes[2].strength = this.config.BLOOM_STRENGH;
+
         window.requestAnimationFrame(this.update.bind(this));
+    }
+
+    interlace(what: number, target: number, epsilon: number = 0.01): number{
+        if(Math.abs(what - target) < 0.01)
+            return target;
+        if(what < target){
+            return what + epsilon;
+        }
+        else if(what > target){
+            return what - epsilon;
+        }
+    }
+
+    randomPosOnMap(){
+        const x = random.float(-this.config.WORLD_SIZE/2, this.config.WORLD_SIZE/2);
+        const y = random.float(-this.config.WORLD_SIZE/2, this.config.WORLD_SIZE/2);
+
+        return new Pos2D(x, y)
     }
 }

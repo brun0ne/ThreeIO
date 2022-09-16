@@ -17,6 +17,8 @@
   "dependencies": {
     "@babel/runtime": "^7.19.0",
     "random": "^3.0.6",
+    "random-weighted-choice": "^0.1.4",
+    "replaceall": "^0.1.6",
     "three": "^0.144.0",
     "three-nebula": "^10.0.3"
   }

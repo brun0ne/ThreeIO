@@ -1,16 +1,18 @@
 import * as THREE from "three"
 import { player_model, SettingsType } from "../models/player";
+import Assets from "./Assets";
+import BoxObject from "./BoxObject";
 import GameObject from "./GameObject";
 import GameScreen from "./GameScreen";
 import GameWorld from "./GameWorld";
 import Pos2D from "./Pos2D";
 
-import dot from "../assets/white.png"
-
 export default class Player extends GameObject{
     light: THREE.PointLight
     Z: number
     LIGHT_Z: number
+    SPEED_UP: boolean
+
     settings: SettingsType
 
     shaders_data: any
@@ -28,6 +30,7 @@ export default class Player extends GameObject{
 
         this.Z = 0;
         this.LIGHT_Z = 12;
+        this.SPEED_UP = false;
     }
 
     load(screen: GameScreen){
@@ -42,38 +45,60 @@ export default class Player extends GameObject{
         screen.player_scene.add(this.model);
         screen.scene.add(this.light);
 
-        this.loadParticles(screen, dot);
+        this.loadSmallExplosion(screen, Assets.get("white"));
     }
 
     update(screen: GameScreen, world: GameWorld){
         this.model.position.set(this.pos.x + world.camera.pos.x, this.Z, this.pos.y + world.camera.pos.y);
         this.light.position.set(this.pos.x + world.camera.pos.x, this.LIGHT_Z, this.pos.y + world.camera.pos.y);
 
+        // check for intersecting with objects
         world.objects.forEach(object => {
             if(world.distance(this.real_pos(world), object.pos) < this.settings.radius)
                 this.eat(screen, object, world);
         });
         
-        if(this.settings.radius < this.settings.targetRadius)
-            this.settings.radius += 0.01;
+        this.settings.radius = screen.interlace(this.settings.radius, this.settings.targetRadius);
 
         this.updateShadersData();
 
+        // SPEED UP
+        if(this.SPEED_UP){
+            world.camera.target_speed = 1.0; 
+            this.loose_mass(world, screen);
+        }
+        else{
+            world.camera.target_speed = 0.5;
+        }
+
+        world.camera.speed = screen.interlace(world.camera.speed, world.camera.target_speed);
+
+        // refresh score display
         $("#score").html("Score: " + Math.floor(this.settings.targetRadius*10 - 30));
     }
 
     eat(screen: GameScreen, object: GameObject, world: GameWorld){
-        const BONUS = object.scale.x * 2 / this.settings.targetRadius;
+        if(object.eatCooldown > 0)
+            return false;
 
+        const BONUS = object.scale.x * 2 / this.settings.targetRadius;
         this.settings.targetRadius += BONUS;
 
-        const POS = object.model.position;
-        POS.y += 150;
-        this.emitParticles(0.05, POS);
+        if(object instanceof BoxObject){
+            const POS = new THREE.Vector3(object.pos.x, 150, object.pos.y);
+            this.emitParticles(0.05, POS);
+        }
 
         screen.config.TARGET_CAMERA_WIDTH += BONUS * 10;
 
-        object.remove(world);
+        object.remove(screen, world);
+    }
+
+    loose_mass(world: GameWorld, screen: GameScreen){
+        if(world.time % 30 == 0){
+            world.addObject(new BoxObject(this.real_pos(world), world.camera.target_speed * this.settings.radius * 2), screen);
+            this.settings.targetRadius *= 0.9;
+        }
     }
 
     real_pos(world: GameWorld): Pos2D{
