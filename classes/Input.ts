@@ -1,5 +1,5 @@
 import Player from "./Player";
-import Camera from "./Camera";
+import CameraObject from "./CameraObject";
 import Pos2D from "./Pos2D";
 import GameScreen from "./GameScreen";
 
@@ -66,7 +66,7 @@ export default class Input{
         });
     }
 
-    static followMouse(player: Player, camera: Camera){
+    static followMouse(player: Player, camera: CameraObject){
         let distance = new Pos2D(
             Input.mouse.pos.x - window.innerWidth/2,
             Input.mouse.pos.y - window.innerHeight/2
@@ -86,7 +86,7 @@ export default class Input{
         camera.pos.y += speed.y;
     }
 
-    static update(player: Player, camera: Camera, screen: GameScreen){
+    static update(player: Player, camera: CameraObject, screen: GameScreen){
         const USE_KEYBOARD = false;
 
         if(USE_KEYBOARD){

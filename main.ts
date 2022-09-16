@@ -32,7 +32,7 @@ $(document).ready(function(){
         }
         if(LOADED){
             world.update(screen);
-            Input.update(world.player, world.camera, screen);
+            Input.update(world.player, world.camera_obj, screen);
         }
     }, 1000/FPS);
 });

@@ -49,8 +49,8 @@ export default class Player extends GameObject{
     }
 
     update(screen: GameScreen, world: GameWorld){
-        this.model.position.set(this.pos.x + world.camera.pos.x, this.Z, this.pos.y + world.camera.pos.y);
-        this.light.position.set(this.pos.x + world.camera.pos.x, this.LIGHT_Z, this.pos.y + world.camera.pos.y);
+        this.model.position.set(this.pos.x + world.camera_obj.pos.x, this.Z, this.pos.y + world.camera_obj.pos.y);
+        this.light.position.set(this.pos.x + world.camera_obj.pos.x, this.LIGHT_Z, this.pos.y + world.camera_obj.pos.y);
 
         // check for intersecting with objects
         world.objects.forEach(object => {
@@ -64,14 +64,14 @@ export default class Player extends GameObject{
 
         // SPEED UP
         if(this.SPEED_UP){
-            world.camera.target_speed = 1.0; 
+            world.camera_obj.target_speed = 1.0; 
             this.loose_mass(world, screen);
         }
         else{
-            world.camera.target_speed = 0.5;
+            world.camera_obj.target_speed = 0.5;
         }
 
-        world.camera.speed = screen.interlace(world.camera.speed, world.camera.target_speed);
+        world.camera_obj.speed = screen.interlace(world.camera_obj.speed, world.camera_obj.target_speed);
 
         // refresh score display
         $("#score").html("Score: " + Math.floor(this.settings.targetRadius*10 - 30));
@@ -96,13 +96,14 @@ export default class Player extends GameObject{
 
     loose_mass(world: GameWorld, screen: GameScreen){
         if(world.time % 30 == 0){
-            world.addObject(new BoxObject(this.real_pos(world), world.camera.target_speed * this.settings.radius * 2), screen);
+            world.addObject(new BoxObject(this.real_pos(world), world.camera_obj.target_speed * this.settings.radius * 2), screen);
             this.settings.targetRadius *= 0.9;
+            screen.config.TARGET_CAMERA_WIDTH *= 0.9;
         }
     }
 
     real_pos(world: GameWorld): Pos2D{
-        return new Pos2D(this.pos.x + world.camera.pos.x, this.pos.y + world.camera.pos.y);
+        return new Pos2D(this.pos.x + world.camera_obj.pos.x, this.pos.y + world.camera_obj.pos.y);
     }
 
     updateShadersData(){

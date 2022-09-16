@@ -10,22 +10,11 @@ export type SettingsType = {
 export function player_model(uniform_data: any, settings: SettingsType): THREE.Group{
     const model = new THREE.Group();
 
-    // const BoxMaterial = new THREE.MeshStandardMaterial({color: 0xfcba03, wireframe: true});
-
     const BoxMaterial = new THREE.ShaderMaterial({
         wireframe: false,
         uniforms: uniform_data,
         vertexShader: perlin_wobble(),
-        fragmentShader: `
-            uniform float time;
-
-            // passed from vertex shader
-            varying vec3 pos;
-
-            void main(){
-                gl_FragColor = vec4(1.0, sin(time/60.0)/4.0, sin(pos.z/5.0), 1.0);
-            }
-        `
+        fragmentShader: require("raw-loader!/shaders/player.frag").default
     });
 
     const box = new THREE.Mesh(

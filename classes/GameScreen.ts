@@ -205,11 +205,10 @@ export default class GameScreen{
         this.stats.update();
 
         // config => target
-        if(this.config.CAMERA_WIDTH < this.config.TARGET_CAMERA_WIDTH){
-            this.config.CAMERA_WIDTH += 0.01;
+        if(this.config.CAMERA_WIDTH != this.config.TARGET_CAMERA_WIDTH){
+            this.config.CAMERA_WIDTH = this.interlace(this.config.CAMERA_WIDTH, this.config.TARGET_CAMERA_WIDTH);
             this.set_camera();
         }
-
         this.config.BLOOM_STRENGH = this.interlace(this.config.BLOOM_STRENGH, this.config.TARGET_BLOOM_STRENGH);
         this.composer.passes[2].strength = this.config.BLOOM_STRENGH;
 

@@ -1,19 +1,18 @@
 import GameScreen from './GameScreen'
 import GameObject from './GameObject'
 import Pos2D from './Pos2D'
-import Camera from './Camera'
+import CameraObject from './CameraObject'
 import Player from './Player'
 import Input from './Input'
 
 import BoxObject from './BoxObject'
 import WanderingObject from './WanderingObject'
 
-import random from "../node_modules/random/dist/cjs/random"
 import randomWeightedChoice from "random-weighted-choice"
 
 export default class GameWorld{
     objects: GameObject[]
-    camera: Camera
+    camera_obj: CameraObject
     player: Player
 
     time: number
@@ -25,7 +24,7 @@ export default class GameWorld{
 
         this.time = 0;
 
-        this.camera = new Camera();
+        this.camera_obj = new CameraObject();
         this.player = new Player();
     }
 
@@ -56,11 +55,11 @@ export default class GameWorld{
 
         // camera follows the player
         if(!Input.camera_angle)
-            screen.camera.position.set(this.player.pos.x + this.camera.pos.x, screen.config.CAMERA_Y, this.player.pos.y + this.camera.pos.y);
+            screen.camera.position.set(this.player.pos.x + this.camera_obj.pos.x, screen.config.CAMERA_Y, this.player.pos.y + this.camera_obj.pos.y);
         else
-            screen.camera.position.set(this.player.pos.x + this.camera.pos.x, screen.config.CAMERA_Y / 5, this.player.pos.y + this.camera.pos.y + 25);  
+            screen.camera.position.set(this.player.pos.x + this.camera_obj.pos.x, screen.config.CAMERA_Y / 5, this.player.pos.y + this.camera_obj.pos.y + 25);  
         
-        screen.camera.lookAt(this.player.pos.x + this.camera.pos.x, 0, this.player.pos.y + this.camera.pos.y);
+        screen.camera.lookAt(this.player.pos.x + this.camera_obj.pos.x, 0, this.player.pos.y + this.camera_obj.pos.y);
 
         // increase time
         this.time += 1;

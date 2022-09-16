@@ -6,38 +6,8 @@ export default function box_model(uniform_data: any): THREE.Group{
     const BoxMaterial = new THREE.ShaderMaterial({
         wireframe: false,
         uniforms: uniform_data,
-        vertexShader: `
-            precision highp float;
-
-            uniform float time;
-            uniform float display;
-
-            // passed to fragment shader
-            varying vec3 pos;
-
-            void main(){
-                // projectionMatrix, modelViewMatrix, position <--- passed in
-
-                // varying
-                pos = position;
-
-                vec4 result;
-                result = vec4(position, 1.0);
-
-                gl_Position = projectionMatrix * modelViewMatrix * result;
-            }
-        `,
-        fragmentShader: `
-            uniform float time;
-            uniform float display;
-
-            // passed from vertex shader
-            varying vec3 pos;
-
-            void main(){
-                gl_FragColor = vec4(1.0, sin(time/20.0) / 2.0 + cos(time/20.0) / 2.0, 0.0, 1.0 * display);
-            }
-        `
+        vertexShader: require("raw-loader!/shaders/box.vert").default,
+        fragmentShader: require("raw-loader!/shaders/box.frag").default
     });
 
     const box = new THREE.Mesh(

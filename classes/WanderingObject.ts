@@ -20,7 +20,8 @@ export default class WanderingObject extends GameObject{
     dirAngleChange: number
 
     constructor(pos: Pos2D){
-        super(pos, null, new THREE.Vector3(10, 10, 10));
+        const SIZE_FOR_SCORE = 5;
+        super(pos, null, new THREE.Vector3(SIZE_FOR_SCORE, SIZE_FOR_SCORE, SIZE_FOR_SCORE));
 
         this.SPEED = 0.5;
         this.INTENSITY = 1;
