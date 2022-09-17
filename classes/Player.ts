@@ -46,6 +46,9 @@ export default class Player extends GameObject{
         screen.scene.add(this.light);
 
         this.loadSmallExplosion(screen, Assets.get("white"));
+
+        // pre-scale the view
+        screen.config.CAMERA_WIDTH = screen.config.BASE_CAMERA_WIDTH + this.settings.radius * 10;
     }
 
     update(screen: GameScreen, world: GameWorld){
@@ -58,9 +61,12 @@ export default class Player extends GameObject{
                 this.eat(screen, object, world);
         });
         
-        this.settings.radius = screen.interlace(this.settings.radius, this.settings.targetRadius);
+        this.settings.radius = screen.interlace(this.settings.radius, this.settings.targetRadius, Math.abs(1 - this.settings.targetRadius / this.settings.radius));
 
         this.updateShadersData();
+
+        // scale the view
+        this.updateCameraView(screen);
 
         // SPEED UP
         if(this.SPEED_UP){
@@ -77,6 +83,10 @@ export default class Player extends GameObject{
         $("#score").html("Score: " + Math.floor(this.settings.targetRadius*10 - 30));
     }
 
+    updateCameraView(screen: GameScreen){
+        screen.config.TARGET_CAMERA_WIDTH = screen.config.BASE_CAMERA_WIDTH + this.settings.radius * 10;
+    }
+
     eat(screen: GameScreen, object: GameObject, world: GameWorld){
         if(object.eatCooldown > 0)
             return false;
@@ -89,16 +99,13 @@ export default class Player extends GameObject{
             this.emitParticles(0.05, POS);
         }
 
-        screen.config.TARGET_CAMERA_WIDTH += BONUS * 10;
-
         object.remove(screen, world);
     }
 
     loose_mass(world: GameWorld, screen: GameScreen){
         if(world.time % 30 == 0){
             world.addObject(new BoxObject(this.real_pos(world), world.camera_obj.target_speed * this.settings.radius * 2), screen);
-            this.settings.targetRadius *= 0.9;
-            screen.config.TARGET_CAMERA_WIDTH *= 0.9;
+            this.settings.targetRadius -= 0.5;
         }
     }
 

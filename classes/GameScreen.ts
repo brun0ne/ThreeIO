@@ -18,6 +18,9 @@ import AmbienceParticles from "./AmbienceParticles"
 
 import random from "../node_modules/random/dist/cjs/random"
 
+import GameWorld from "./GameWorld";
+import Input from "./Input";
+
 type ConfigType = {
     shadows: boolean
     CAMERA_Y: number
@@ -26,6 +29,7 @@ type ConfigType = {
     GROUND_LEVEL: number
     BLOOM_STRENGH: number
     TARGET_BLOOM_STRENGH: number
+    BASE_CAMERA_WIDTH: number
     WORLD_SIZE: number
 }
 
@@ -44,22 +48,28 @@ export default class GameScreen{
     nebula: ParticleSystem
     GPU_nebula: ParticleSystem
 
+    clock: THREE.Clock // for constant logic speed
+
     constructor(){
         this.scene = new THREE.Scene();
         this.player_scene = new THREE.Scene();
+
+        this.clock = new THREE.Clock(true);
 
         this.config = {
             shadows: true,
             CAMERA_Y: 200,
             CAMERA_WIDTH: 0,
-            TARGET_CAMERA_WIDTH: 960 / 8, // scale
+            TARGET_CAMERA_WIDTH: 0, 
+            BASE_CAMERA_WIDTH: 960 / 8 - 30, // scale
             GROUND_LEVEL: 0,
             BLOOM_STRENGH: 0,
             TARGET_BLOOM_STRENGH: 0.2, // also controled by Inputs class
             WORLD_SIZE: 1000
         };
 
-        this.config.CAMERA_WIDTH = this.config.TARGET_CAMERA_WIDTH;
+        this.config.CAMERA_WIDTH = this.config.BASE_CAMERA_WIDTH;
+        this.config.TARGET_CAMERA_WIDTH = this.config.BASE_CAMERA_WIDTH;
         this.config.BLOOM_STRENGH = this.config.TARGET_BLOOM_STRENGH;
     }
 
@@ -196,7 +206,9 @@ export default class GameScreen{
         return window.innerHeight;
     }
 
-    update(){
+    update(world: GameWorld){
+        let delta = this.clock.getDelta() * 60 | 1;
+
         this.composer.render();
 
         this.nebula.update();
@@ -206,13 +218,19 @@ export default class GameScreen{
 
         // config => target
         if(this.config.CAMERA_WIDTH != this.config.TARGET_CAMERA_WIDTH){
-            this.config.CAMERA_WIDTH = this.interlace(this.config.CAMERA_WIDTH, this.config.TARGET_CAMERA_WIDTH);
+            this.config.CAMERA_WIDTH = this.interlace(this.config.CAMERA_WIDTH, this.config.TARGET_CAMERA_WIDTH, Math.abs(1 - this.config.TARGET_CAMERA_WIDTH / this.config.CAMERA_WIDTH));
             this.set_camera();
         }
         this.config.BLOOM_STRENGH = this.interlace(this.config.BLOOM_STRENGH, this.config.TARGET_BLOOM_STRENGH);
         this.composer.passes[2].strength = this.config.BLOOM_STRENGH;
 
-        window.requestAnimationFrame(this.update.bind(this));
+        // logic
+        world.update(this);
+        Input.update(world.player, world.camera_obj, this, delta);
+
+        window.requestAnimationFrame(function(){
+            this.update(world);
+        }.bind(this));
     }
 
     interlace(what: number, target: number, epsilon: number = 0.01): number{

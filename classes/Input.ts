@@ -66,7 +66,7 @@ export default class Input{
         });
     }
 
-    static followMouse(player: Player, camera: CameraObject){
+    static followMouse(camera: CameraObject, delta: number){
         let distance = new Pos2D(
             Input.mouse.pos.x - window.innerWidth/2,
             Input.mouse.pos.y - window.innerHeight/2
@@ -78,42 +78,44 @@ export default class Input{
         }
 
         if(Math.abs(distance.x) > 50)
-            speed.x = distance.normalized.x * camera.speed;
+            speed.x = distance.normalized.x * camera.speed * delta;
         if(Math.abs(distance.y) > 50)
-            speed.y = distance.normalized.y * camera.speed;
+            speed.y = distance.normalized.y * camera.speed * delta;
 
         camera.pos.x += speed.x;
         camera.pos.y += speed.y;
     }
 
-    static update(player: Player, camera: CameraObject, screen: GameScreen){
+    static update(player: Player, camera: CameraObject, screen: GameScreen, delta: number){
         const USE_KEYBOARD = false;
 
         if(USE_KEYBOARD){
             if(Input.keys[87]){ // W
-                camera.pos.y -= camera.speed;
+                camera.pos.y -= camera.speed * delta;
             }
             if(Input.keys[83]){ // S
-                camera.pos.y += camera.speed;
+                camera.pos.y += camera.speed * delta;
             }
             if(Input.keys[65]){ // A
-                camera.pos.x -= camera.speed;
+                camera.pos.x -= camera.speed * delta;
             }
             if(Input.keys[68]){ // D
-                camera.pos.x += camera.speed;
+                camera.pos.x += camera.speed * delta;
             }
         }
         else{
-            Input.followMouse(player, camera);
+            Input.followMouse(camera, delta);
         }
 
-        if(Input.mouse.left && player.settings.targetRadius > 1){
+        if(Input.mouse.left && player.settings.targetRadius > 2){
             screen.config.TARGET_BLOOM_STRENGH = 0.4;
             player.SPEED_UP = true;
         }
         else{
             screen.config.TARGET_BLOOM_STRENGH = 0.2;
             player.SPEED_UP = false;
+
+            // player.settings.radius += 0.01;
         }
     }
 }

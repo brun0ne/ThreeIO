@@ -17,7 +17,7 @@ $(document).ready(function(){
     // start main loop
     const FPS = 60;
     
-    setInterval(function(){
+    const loop = setInterval(function(){
         if(!LOADED && Assets.TO_LOAD == Assets.loaded()){
             LOADED = true;
 
@@ -27,12 +27,9 @@ $(document).ready(function(){
             // start drawing loop
             setTimeout(function(){
                 $("#loading").remove();
-                screen.update();
+                screen.update(world);
+                clearInterval(loop);
             }, 200);
         }
-        if(LOADED){
-            world.update(screen);
-            Input.update(world.player, world.camera_obj, screen);
-        }
-    }, 1000/FPS);
+    }, 1000*10/FPS);
 });
