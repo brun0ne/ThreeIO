@@ -14,9 +14,7 @@ $(document).ready(function(){
 
     let LOADED = false;
 
-    // start main loop
-    const FPS = 60;
-    
+    // start loading loop
     const loop = setInterval(function(){
         if(!LOADED && Assets.TO_LOAD == Assets.loaded()){
             LOADED = true;
@@ -31,5 +29,5 @@ $(document).ready(function(){
                 clearInterval(loop);
             }, 200);
         }
-    }, 1000*10/FPS);
+    }, 1000*10/60);
 });

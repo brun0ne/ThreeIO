@@ -92,7 +92,7 @@ export default class WanderingObject extends GameObject{
     randomizePos(screen: GameScreen, world: GameWorld){
         this.pos = screen.randomPosOnMap();
 
-        if(world.distance(this.pos, world.player.real_pos(world)) < screen.config.CAMERA_WIDTH * 2){
+        if(world.distance(this.pos, world.player.real_pos(world)) < screen.config.CAMERA_WIDTH / 2){
             this.randomizePos(screen, world);
         }
     }
