@@ -3,7 +3,7 @@
 
 ## Work in progress!
 But you can play the latest version here:
-https://brun0ne.github.io/ThreeJS-IO-Game/
+https://brun0ne.github.io/ThreeIO
 
 ## Installation
 If you want to build it yourself, you need [NodeJS](https://nodejs.org/en/). Then clone the repo:
