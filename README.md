@@ -8,7 +8,7 @@ https://brun0ne.github.io/ThreeIO
 ## Installation
 If you want to build it yourself, you need [NodeJS](https://nodejs.org/en/). Then clone the repo:
 ```console
-$ git clone https://github.com/brun0ne/ThreeJS-IO-Game
+$ git clone https://github.com/brun0ne/ThreeIO
 ```
 
 And inside the project folder run in terminal:
